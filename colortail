@@ -1,0 +1,116 @@
+#!/usr/bin/python3
+"""
+This script has been derived from a billion android adb logcat scripts
+floating around the internet.
+
+Produces coloured logfile output with a different colour for each line based on
+the logging level (debug, info, warning, etc.). Works as a `tail -f` replacement
+or accepts piped input:
+
+    ~# colortail /var/log/myservice.log
+    ~# colortail < /var/log/myservice.log
+
+The format that the script expects is output produced by python's logging
+formatters, with basic "%(asctime)s %(name)s %(levelname)s %(message)s" setup,
+however any log file that has <date> <producer> <loglevel> at the beginning of
+each line will (probably) work.
+
+@author: Mikko Mensonen <mikko@mensonen.com>
+"""
+import os
+import sys
+import re
+import io
+
+# The log line syntax to highlight:
+# <timestamp> <user (optional)> <producer> <loglevel> <msg>
+log_fmt = re.compile(r"^([\d\s,:-]+)([\da-z@_.]+\s+)?([A-Za-z0-9_.]+\s+)([A-Z]{4,})(.*)$")
+
+BLACK: int = 0
+RED: int = 1
+GREEN: int = 2
+YELLOW: int = 3
+BLUE: int = 4
+MAGENTA: int = 5
+CYAN: int = 6
+WHITE: int = 7
+
+
+def fmt_text(fg: int = None, bg: int = None, bright: bool = False,
+             bold: bool = False, dim: bool = False, reset: bool = False) -> str:
+    """Produce an ANSI escape sequence to start a colour.
+
+    Manually derived from http://en.wikipedia.org/wiki/ANSI_escape_code#Codes
+    """
+    codes = []
+    if reset:
+        codes.append("0")
+    else:
+        if fg is not None:
+            codes.append(f"3{fg:d}")
+        if bg is not None:
+            if not bright:
+                codes.append(f"4{bg:d}")
+            else:
+                codes.append(f"10{bg:d}")
+        if bold:
+            codes.append("1")
+        elif dim:
+            codes.append("2")
+        else:
+            codes.append("22")
+    return f"\033[{';'.join(codes)}m"
+
+
+def allocate_color(tag: str) -> str:
+    """Pick an ANSI colour start sequence for a log level."""
+    if tag not in KNOWN_TAGS:
+        return fmt_text(fg=WHITE, dim=True)
+    return KNOWN_TAGS[tag]
+
+
+KNOWN_TAGS: dict[str, str] = {
+    "DEBUG": fmt_text(fg=GREEN, dim=True),
+    "INFO": fmt_text(fg=CYAN),
+    "WARNING": fmt_text(fg=YELLOW, bright=True),
+    "WARN": fmt_text(fg=YELLOW, bright=True),
+    "ERROR": fmt_text(fg=BLACK, bg=RED),
+    "CRITICAL": fmt_text(fg=WHITE, bg=RED)}
+
+
+args = ''.join(sys.argv[1:])
+pipe = False
+
+# If someone is piping in to us, use stdin as input. If not, invoke tail
+if os.isatty(sys.stdin.fileno()):
+    input_lines = os.popen("tail -n 80 -F %s" % args)
+else:
+    pipe = True
+    input_lines = sys.stdin
+
+while True:
+    try:
+        line = input_lines.readline()
+        if pipe and not line:
+            break
+    except KeyboardInterrupt:
+        break
+
+    match = log_fmt.match(line)
+    if match is not None:
+        timestamp, user, owner, loglevel, message = match.groups()
+        linebuf = io.StringIO()
+        if not user:
+            user = ''
+
+        color = allocate_color(loglevel.strip())
+        linebuf.write(f"{fmt_text(fg=WHITE, dim=True)}{timestamp}{user}"
+                      f"{fmt_text(reset=True)}")
+        linebuf.write(f"{color}{owner}")
+        linebuf.write(loglevel)
+        linebuf.write(f"{message}{fmt_text(reset=True)}")
+        line = linebuf.getvalue()
+    else:
+        line = line.rstrip()
+
+    print(line)
