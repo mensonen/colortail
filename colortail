@@ -13,10 +13,10 @@ or accepts piped input:
 
 The format that the script expects is output produced by python's logging
 formatters, with basic "%(asctime)s %(name)s %(levelname)s %(message)s" setup,
-however any log file that has <timestamp> <loglevel> at the beginning of
-each line will (probably) work. The first fields before the log level need to 
-be space-separated, there can be maximum three fields before the loglevel and
-loglevel must be in capital letters.
+however any log file that has <timestamp> <anything> <loglevel> at the
+beginning of each line will (probably) work. The first fields before the log
+level need to be space-separated, there can be maximum three fields before the
+loglevel and loglevel must be in capital letters.
 
 Author: Mikko Mensonen <mikko@mensonen.com>
 """
@@ -27,7 +27,7 @@ import io
 
 # The log line syntax to highlight:
 # <timestamp> <user (optional)> <producer> <loglevel> <msg>
-log_fmt = re.compile(r"^([\d\s,:-]+)([\da-z@_.]+\s+)?([A-Za-z0-9_.]+\s+)?([A-Z]{4,})(.*)$")
+log_fmt = re.compile(r"^([\d\s,:-]+)([\da-z@_.]+\s+)?([A-Za-z0-9_.]+\s+)([A-Z]{4,})(.*)$")
 
 BLACK: int = 0
 RED: int = 1
