@@ -18,7 +18,7 @@ each line will (probably) work. The first fields before the log level need to
 be space-separated, there can be maximum three fields before the loglevel and
 loglevel must be in capital letters.
 
-@author: Mikko Mensonen <mikko@mensonen.com>
+Author: Mikko Mensonen <mikko@mensonen.com>
 """
 import os
 import sys
