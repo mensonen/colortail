@@ -1,0 +1,6 @@
+2005-03-19 15:10:26,618 logName DEBUG (Thread-1) debug message
+2005-03-19 15:10:26,620 logName INFO (Thread-1) info message
+2005-03-19 15:10:26,695 logName WARNING (Thread-1) warn message
+2005-03-19 15:10:26,697 logName ERROR (Thread-1) error message
+2005-03-19 15:10:26,773 logName CRITICAL (Thread-1) critical message
+2005-03-19 15:10:26,773 logName unknown format (Thread-1) no colour

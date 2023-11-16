@@ -1,0 +1,3 @@
+2005-03-19 15:10:26,618 user@host urllib3.connectionpool DEBUG debug message
+2005-03-19 15:10:26,618 user@host urllib3.connectionpool DEBUG debug message
+2005-03-19 15:10:26,620 user@host urllib3.connectionpool INFO info message
