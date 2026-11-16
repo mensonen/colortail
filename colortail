@@ -26,8 +26,12 @@ import re
 import io
 
 # The log line syntax to highlight:
-# <timestamp> <user (optional)> <producer> <loglevel> <msg>
-log_fmt = re.compile(r"^([\d\s,:-]+)([\da-z@_.]+\s+)?([A-Za-z0-9_.]+\s+)([A-Z]{4,})(.*)$")
+# <timestamp> <user (optional)> <producer (optional)> <loglevel> <msg>
+log_fmt = re.compile(
+    r"^([\d\s,:-]+)"
+    r"([\da-z@_.]+\s+(?=[A-Za-z0-9_.]+\s+[A-Z]{4,}))?"
+    r"([A-Za-z0-9_.]+\s+)?([A-Z]{4,})(.*)$"
+)
 
 BLACK: int = 0
 RED: int = 1
